@@ -13,8 +13,9 @@
         <button type="submit">Scrape</button>
     </form>
 
+    <p id="loadingMessage" style="display: none;">Loading, please wait...</p>
+
     <div id="results">
-        <h2>Summary</h2>
         <p id="summary"></p>
         <h2>Sentiment</h2>
         <p id="sentiment"></p>
@@ -25,16 +26,42 @@
             event.preventDefault();
 
             const url = document.getElementById('url').value;
-            const response = await fetch('/scrape', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ url })
-            });
-            const result = await response.json();
-            document.getElementById('summary').textContent = result.summary;
-            document.getElementById('sentiment').textContent = `Polarity: ${result.sentiment.polarity}, Subjectivity: ${result.sentiment.subjectivity}`;
+            const loadingMessage = document.getElementById('loadingMessage');
+            const summaryElement = document.getElementById('summary');
+            const sentimentElement = document.getElementById('sentiment');
+
+            // Show loading message
+            loadingMessage.style.display = 'block';
+
+            // Clear previous results
+            summaryElement.textContent = '';
+            sentimentElement.textContent = '';
+
+            try {
+                const response = await fetch('/scrape', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url })
+                });
+
+                const result = await response.json();
+
+                // Hide loading message
+                loadingMessage.style.display = 'none';
+
+                // Display results
+                summaryElement.textContent = result.summary;
+                sentimentElement.textContent = `Polarity: ${result.sentiment.polarity}, Subjectivity: ${result.sentiment.subjectivity}`;
+            } catch (error) {
+                // Hide loading message
+                loadingMessage.style.display = 'none';
+
+                // Display error message
+                summaryElement.textContent = 'An error occurred while processing the request.';
+                sentimentElement.textContent = '';
+            }
         });
     </script>
 </body>
