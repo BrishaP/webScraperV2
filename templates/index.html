@@ -1,68 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Scraper App</title>
-</head>
-<body>
-    <h1>Web Scraper with Sentiment Analysis</h1>
-    <form id="scrapeForm">
-        <label for="url">Enter URL:</label>
-        <input type="text" id="url" name="url" required>
-        <button type="submit">Scrape</button>
-    </form>
+document.getElementById('scrapeForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
 
-    <p id="loadingMessage" style="display: none;">Loading, please wait...</p>
+    const url = document.getElementById('url').value;
+    const loadingMessage = document.getElementById('loadingMessage');
+    const summaryElement = document.getElementById('summary');
+    const sentimentElement = document.getElementById('sentiment');
+    const interpretationElement = document.getElementById('interpretation');
 
-    <div id="results">
-        <p id="summary"></p>
-        <h2>Sentiment</h2>
-        <p id="sentiment"></p>
-    </div>
+    // Show loading message
+    loadingMessage.style.display = 'block';
 
-    <script>
-        document.getElementById('scrapeForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
+    // Clear previous results
+    summaryElement.textContent = '';
+    sentimentElement.textContent = '';
+    interpretationElement.textContent = '';
 
-            const url = document.getElementById('url').value;
-            const loadingMessage = document.getElementById('loadingMessage');
-            const summaryElement = document.getElementById('summary');
-            const sentimentElement = document.getElementById('sentiment');
-
-            // Show loading message
-            loadingMessage.style.display = 'block';
-
-            // Clear previous results
-            summaryElement.textContent = '';
-            sentimentElement.textContent = '';
-
-            try {
-                const response = await fetch('/scrape', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url })
-                });
-
-                const result = await response.json();
-
-                // Hide loading message
-                loadingMessage.style.display = 'none';
-
-                // Display results
-                summaryElement.textContent = result.summary;
-                sentimentElement.textContent = `Polarity: ${result.sentiment.polarity}, Subjectivity: ${result.sentiment.subjectivity}`;
-            } catch (error) {
-                // Hide loading message
-                loadingMessage.style.display = 'none';
-
-                // Display error message
-                summaryElement.textContent = 'An error occurred while processing the request.';
-                sentimentElement.textContent = '';
-            }
+    try {
+        const response = await fetch('/scrape', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url })
         });
-    </script>
-</body>
-</html>
+
+        const result = await response.json();
+
+        // Hide loading message
+        loadingMessage.style.display = 'none';
+
+        // Display results
+        summaryElement.textContent = result.summary;
+        sentimentElement.textContent = `Polarity: ${result.sentiment.polarity}, Subjectivity: ${result.sentiment.subjectivity}`;
+
+        // Interpretation logic
+        let interpretationMessage = '';
+        if (result.sentiment.polarity >= -1.0 && result.sentiment.polarity < -0.6) {
+            interpretationMessage = 'Very Negative Sentiment: Strongly negative or critical tone.\nRange: [-1.0, -0.6]\nMeaning: Indicates strong negative feelings. Content in this range typically expresses anger, frustration, or sadness.';
+        } else if (result.sentiment.polarity >= -0.6 && result.sentiment.polarity < -0.2) {
+            interpretationMessage = 'Moderately Negative Sentiment: Noticeable negativity, but not extreme.\nRange: [-0.6, -0.2]\nMeaning: Shows a moderate level of negativity. Content may convey disappointment, mild irritation, or dissatisfaction.';
+        } else if (result.sentiment.polarity >= -0.2 && result.sentiment.polarity < 0.0) {
+            interpretationMessage = 'Mildly Negative Sentiment: Slight negative feeling, but not too intense.\nRange: [-0.2, 0.0]\nMeaning: Suggests slight negativity. Content may indicate mild annoyance or criticism without being overly harsh.';
+        } else if (result.sentiment.polarity === 0.0) {
+            interpretationMessage = 'Neutral Sentiment: Balanced or indifferent, no strong positive or negative emotions.\nRange: [0.0, 0.0]\nMeaning: Represents a neutral position, where there are no strong feelings expressed. Content is factual or unbiased.';
+        } else if (result.sentiment.polarity > 0.0 && result.sentiment.polarity <= 0.2) {
+            interpretationMessage = 'Mildly Positive Sentiment: Slightly positive or favorable tone, but not very strong.\nRange: [0.0, 0.2]\nMeaning: Indicates slight positivity. Content may express mild approval or satisfaction without being overly enthusiastic.';
+        } else if (result.sentiment.polarity > 0.2 && result.sentiment.polarity <= 0.6) {
+            interpretationMessage = 'Moderately Positive Sentiment: Clearly positive, showing optimism or approval.\nRange: [0.2, 0.6]\nMeaning: Shows a moderate level of positivity. Content conveys appreciation, happiness, or satisfaction.';
+        } else if (result.sentiment.polarity > 0.6 && result.sentiment.polarity <= 1.0) {
+            interpretationMessage = 'Very Positive Sentiment: Strongly positive or enthusiastic tone.\nRange: [0.6, 1.0]\nMeaning: Indicates strong positive feelings. Content in this range typically expresses joy, excitement, or strong approval.';
+        }
+
+        interpretationElement.textContent = interpretationMessage;
+
+    } catch (error) {
+        // Hide loading message
+        loadingMessage.style.display = 'none';
+
+        // Display error message
+        summaryElement.textContent = 'An error occurred while processing the request.';
+        sentimentElement.textContent = '';
+        interpretationElement.textContent = '';
+    }
+});
