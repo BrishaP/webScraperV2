@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Scraper App</title>
+</head>
+<body>
+    <h1>Web Scraper with Sentiment Analysis</h1>
+    <form id="scrapeForm">
+        <label for="url">Enter URL:</label>
+        <input type="text" id="url" name="url" required>
+        <button type="submit">Scrape</button>
+    </form>
+
+    <div id="results">
+        <h2>Summary</h2>
+        <p id="summary"></p>
+        <h2>Sentiment</h2>
+        <p id="sentiment"></p>
+    </div>
+
+    <script>
+        document.getElementById('scrapeForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const url = document.getElementById('url').value;
+            const response = await fetch('/scrape', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url })
+            });
+            const result = await response.json();
+            document.getElementById('summary').textContent = result.summary;
+            document.getElementById('sentiment').textContent = `Polarity: ${result.sentiment.polarity}, Subjectivity: ${result.sentiment.subjectivity}`;
+        });
+    </script>
+</body>
+</html>
