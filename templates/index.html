@@ -1,93 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Web Scraper App</title>
-</head>
-<body>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
     <h1>Web Scraper with Sentiment Analysis</h1>
     <form id="scrapeForm">
-        <label for="url">Enter URL:</label>
-        <input type="text" id="url" name="url" required>
-        <button type="submit">Scrape</button>
+      <label for="url">Enter URL:</label>
+      <input type="text" id="url" name="url" required />
+      <button type="submit">Scrape</button>
     </form>
 
-    <p id="loadingMessage" style="display: none;">Loading, please wait...</p>
+    <p id="loadingMessage" style="display: none">Loading, please wait...</p>
 
     <div id="results">
-        <p id="summary"></p>
-        <h2>Sentiment</h2>
-        <p id="sentiment"></p>
-        <p id="interpretation"></p> 
+      <p id="summary"></p>
+      <h2>Sentiment</h2>
+      <p id="sentiment"></p>
+      <p id="interpretation"></p>
     </div>
 
     <script>
-        document.getElementById('scrapeForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
+      document
+        .getElementById("scrapeForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
 
-            const url = document.getElementById('url').value;
-            const loadingMessage = document.getElementById('loadingMessage');
-            const summaryElement = document.getElementById('summary');
-            const sentimentElement = document.getElementById('sentiment');
-            const interpretationElement = document.getElementById('interpretation');
+          const url = document.getElementById("url").value;
+          const loadingMessage = document.getElementById("loadingMessage");
+          const summaryElement = document.getElementById("summary");
+          const sentimentElement = document.getElementById("sentiment");
+          const interpretationElement =
+            document.getElementById("interpretation");
 
-            // Show loading message
-            loadingMessage.style.display = 'block';
+          // Show loading message
+          loadingMessage.style.display = "block";
 
-            // Clear previous results
-            summaryElement.textContent = '';
-            sentimentElement.textContent = '';
-            interpretationElement.textContent = '';
+          // Clear previous results
+          summaryElement.textContent = "";
+          sentimentElement.textContent = "";
+          interpretationElement.textContent = "";
 
-            try {
-                const response = await fetch('/scrape', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url })
-                });
+          try {
+            const response = await fetch("/scrape", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ url }),
+            });
 
-                const result = await response.json();
+            const result = await response.json();
 
-                // Hide loading message
-                loadingMessage.style.display = 'none';
+            // Hide loading message
+            loadingMessage.style.display = "none";
 
-                // Display results
-                summaryElement.textContent = result.summary;
-                sentimentElement.textContent = `Polarity: ${result.sentiment.polarity}, Subjectivity: ${result.sentiment.subjectivity}`;
+            // Display results
+            summaryElement.textContent = result.summary;
+            sentimentElement.textContent = `Polarity: ${result.sentiment.polarity}, Subjectivity: ${result.sentiment.subjectivity}`;
 
-                // Interpretation logic
-                let interpretationMessage = '';
-                if (result.sentiment.polarity >= -1.0 && result.sentiment.polarity < -0.6) {
-                    interpretationMessage = 'Very Negative Sentiment: Strongly negative or critical tone.';
-                } else if (result.sentiment.polarity >= -0.6 && result.sentiment.polarity < -0.3) {
-                    interpretationMessage = 'Moderately Negative Sentiment: Noticeable negativity, but not extreme.';
-                } else if (result.sentiment.polarity >= -0.3 && result.sentiment.polarity < -0.1) {
-                    interpretationMessage = 'Mildly Negative Sentiment: Slight negative feeling, but not too intense.';
-                } else if (result.sentiment.polarity >= -0.1 && result.sentiment.polarity <= 0.1) {
-                    interpretationMessage = 'Neutral Sentiment: Balanced or indifferent, no strong positive or negative emotions.';
-                } else if (result.sentiment.polarity > 0.1 && result.sentiment.polarity <= 0.3) {
-                    interpretationMessage = 'Mildly Positive Sentiment: Slightly positive or favorable tone, but not very strong.';
-                } else if (result.sentiment.polarity > 0.3 && result.sentiment.polarity <= 0.6) {
-                    interpretationMessage = 'Moderately Positive Sentiment: Clearly positive, showing optimism or approval.';
-                } else if (result.sentiment.polarity > 0.6 && result.sentiment.polarity <= 1.0) {
-                    interpretationMessage = 'Very Positive Sentiment: Strongly positive or enthusiastic tone.';
-                }
-
-                interpretationElement.textContent = interpretationMessage;
-
-            } catch (error) {
-                // Hide loading message
-                loadingMessage.style.display = 'none';
-
-                // Display error message
-                summaryElement.textContent = 'An error occurred while processing the request.';
-                sentimentElement.textContent = '';
-                interpretationElement.textContent = '';
+            // Interpretation logic
+            let interpretationMessage = "";
+            if (
+              result.sentiment.polarity >= -1.0 &&
+              result.sentiment.polarity < -0.6
+            ) {
+              interpretationMessage =
+                "Very Negative Sentiment: Strongly negative or critical tone.";
+            } else if (
+              result.sentiment.polarity >= -0.6 &&
+              result.sentiment.polarity < -0.3
+            ) {
+              interpretationMessage =
+                "Moderately Negative Sentiment: Noticeable negativity, but not extreme.";
+            } else if (
+              result.sentiment.polarity >= -0.3 &&
+              result.sentiment.polarity < -0.1
+            ) {
+              interpretationMessage =
+                "Mildly Negative Sentiment: Slight negative feeling, but not too intense.";
+            } else if (
+              result.sentiment.polarity >= -0.1 &&
+              result.sentiment.polarity <= 0.1
+            ) {
+              interpretationMessage =
+                "Neutral Sentiment: Balanced or indifferent, no strong positive or negative emotions.";
+            } else if (
+              result.sentiment.polarity > 0.1 &&
+              result.sentiment.polarity <= 0.3
+            ) {
+              interpretationMessage =
+                "Mildly Positive Sentiment: Slightly positive or favorable tone, but not very strong.";
+            } else if (
+              result.sentiment.polarity > 0.3 &&
+              result.sentiment.polarity <= 0.6
+            ) {
+              interpretationMessage =
+                "Moderately Positive Sentiment: Clearly positive, showing optimism or approval.";
+            } else if (
+              result.sentiment.polarity > 0.6 &&
+              result.sentiment.polarity <= 1.0
+            ) {
+              interpretationMessage =
+                "Very Positive Sentiment: Strongly positive or enthusiastic tone.";
             }
+
+            interpretationElement.textContent = interpretationMessage;
+          } catch (error) {
+            // Hide loading message
+            loadingMessage.style.display = "none";
+
+            // Display error message
+            summaryElement.textContent =
+              "An error occurred while processing the request.";
+            sentimentElement.textContent = "";
+            interpretationElement.textContent = "";
+          }
         });
     </script>
-</body>
+  </body>
 </html>
